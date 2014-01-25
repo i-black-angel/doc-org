@@ -1,0 +1,25 @@
+#+TITLE Linux Wireless Device Driver
+
+First, my laptop is Thinkpad Edge E430, and there's a wireless device on its
+motherbord, i use *sudo lshw -class network* command to list its network 
+controller, it shows me some information like below:
+
+id:	
+network
+description:	Network controller
+product:	Broadcom Corporation
+vendor:	Broadcom Corporation
+physical id:	
+0
+bus info:	
+pci@0000:03:00.0
+version:	01
+width:	64 bits
+clock:	33MHz
+capabilities:	pm msi pciexpress bus_master cap_list
+configuration:	
+latency	=	0
+resources:	
+memory	:	cdd00000-cdd07fff
+
+in this situation, 
