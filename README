@@ -1,0 +1,18 @@
+doc-org
+
+I build this repository is going to store all my org-mode files.
+It will includes anything, e.g. coding skills, system administrations,
+favourite books introductions, etc. Any way, Cause i will use different
+computers sometimes, i wanna put my writings on this place, that's all.
+
+1. GIT CLONE
+   $ git clone https://github.com/i-black-angel/doc-org.git
+
+2. Push commits
+   $ git push origin master
+
+3. Pull in upstream changes
+   Fetches any new changes from the original repository
+   $ git fetch upstream
+   Merges any changes fetched into your working files
+   $ git merge upstream/master
