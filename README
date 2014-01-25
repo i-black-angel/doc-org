@@ -16,3 +16,12 @@ computers sometimes, i wanna put my writings on this place, that's all.
    $ git fetch upstream
    Merges any changes fetched into your working files
    $ git merge upstream/master
+
+----------
+OPTIONAL
+   $ git config --global user.name "Your Name"
+   $ git config --global user.email you@example.com
+   $ touch README
+   $ git init
+   $ git add README
+   $ git commit -m "first commit"
