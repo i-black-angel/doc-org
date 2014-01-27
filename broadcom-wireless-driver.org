@@ -1,0 +1,131 @@
+#+TITLE: Thinkpad E430 Broadcom wireless Device Driver
+#+AUTHOR: Shusheng Shaw
+#+EMAIL: bluebird.shao@gmail.com
+
+* Story
+OK, here's my story.
+I have a laptop Thinkpad E430, and there's a wireless device on it, but it does
+not work very well on ubuntu 12.04, though I can discover "Broadcom STA wireless 
+driver" on *System Settings > Additional Drivers*. 
+Yes, I installed it, I mean the additional driver, but, nothing changes, it 
+can't find any Access Point, yet. so I uninstalled the driver and use command:
+#+BEGIN_HTML
+<div style="direction:ltr; margin:0 5px 10px 5px; padding:5px; border-color:#998b75; border-width:1px 1px 1px 1px; border-style:solid; font-weight:normal; color:#006600; line-height:140%; font-size:1em; font-family:courier,monospace; background-color:#FAFAFA">
+$ sudo lshw -class network
+</div>
+#+END_HTML
+it shows me some info like the below:
+#+BEGIN_HTML
+<pre style="border:1pt solid #AEBDCC; background-color:#F3F5F7; padding:5pt; font-family:courier,monospace; font-size:90%; overflow:auto">
+description: Network controller
+product: Broadcom Corporation
+vendor: Broadcom Corporation
+physical id: 0
+bus info: pci@0000:03:00.0
+version: 01
+width: 64 bits
+clock: 33MHz
+capabilities: pm msi pciexpress bus_master cap_list
+configuration: latency=0
+resources: memory:cdd00000-cdd07fff
+</pre>
+#+END_HTML
+here, I got its vendor "Broadcom Corporation" and I realize this is one product 
+of Broadcom Corporation, maybe I can use:
+
+#+BEGIN_HTML
+<div style="direction:ltr; margin:0 5px 10px 5px; padding:5px; border-color:#998b75; border-width:1px 1px 1px 1px; border-style:solid; font-weight:normal; color:#006600; line-height:140%; font-size:1em; font-family:courier,monospace; background-color:#FAFAFA">
+$ sudo lspci -vvnn | grep -i broadcom
+</div>
+#+END_HTML
+to show me some interested info:
+#+BEGIN_HTML
+<pre style="border:1pt solid #AEBDCC; background-color:#F3F5F7; padding:5pt; font-family:courier,monospace; font-size:90%; overflow:auto">
+03:00.0 Network controller [<em>0280</em>]: Broadcom Corporation Device [14e4:4365] (rev 01)
+</pre>
+#+END_HTML
+from outputs, I got two important number:
+#+BEGIN_HTML
+<pre style="border:1pt solid #AEBDCC; background-color:#F3F5F7; padding:5pt; font-family:courier,monospace; font-size:90%; overflow:auto">
+1) PCI Vendor ID 14e4
+2) PCI Device ID 4365
+</pre>
+#+END_HTML
+OK, here we go, then I google "linux broadcom", it take me to
+
+http://www.broadcom.com/support/802.11/linux_sta.php, on
+
+http://www.broadcom.com/docs/linux_sta/README.txt 
+
+file, I finally discovered *0x4365* number, and see what's happening:
+#+BEGIN_HTML
+<pre style="border:1pt solid #AEBDCC; background-color:#F3F5F7; padding:5pt; font-family:courier,monospace; font-size:90%; overflow:auto">
+ BRCM		    PCI		  PCI		  Dell
+Product Name	  Vendor ID	Device ID	Product ID
+...
+43142 2.4 Ghz     0x14e4	0x4365
+...
+</pre>
+#+END_HTML
+Because there's another lines below:
+#+BEGIN_HTML
+<pre style="border:1pt solid #AEBDCC; background-color:#F3F5F7; padding:5pt; font-family:courier,monospace; font-size:90%; overflow:auto">
+WHAT'S NEW IN RELEASE 6.30.223.126
+----------------------------------
++ Upgraded to Support 3.8.x
+<strong>+ Added 43142 support</strong>
+</pre>
+#+END_HTML
+so, that's why the *Additional Drivers* can't drive the wireless device, it's 
+too old.
+
+* Build Instructions
+  1. Setup the directory by untarring the proper talball:
+#+BEGIN_HTML
+<div style="direction:ltr; margin:0 5px 10px 5px; padding:5px; border-color:#998b75; border-width:1px 1px 1px 1px; border-style:solid; font-weight:normal; color:#006600; line-height:140%; font-size:1em; font-family:courier,monospace; background-color:#FAFAFA">
+# mkdir hybrid_wl  <br/>
+# cd hybrid_wl <br/>
+# tar -xzvf ../hybrid-v35-nodebug-pcoem-6_30_223_141.tar.gz <br/>
+# make <br/>
+</div>
+#+END_HTML
+* Install Instructions
+  1. Insert the modules into kernel:
+#+BEGIN_HTML
+  <div style="direction:ltr; margin:0 5px 10px 5px; padding:5px; border-color:#998b75; border-width:1px 1px 1px 1px; border-style:solid; font-weight:normal; color:#006600; line-height:140%; font-size:1em; font-family:courier,monospace; background-color:#FAFAFA">
+  # rmmod wl (optional) <br />
+  # mv /lib/modules/`uname -r`/kernel/net/wireless/wl.ko \ <br />
+       /lib/modules/`uname -r`/kernel/net/wireless/wl.ko.orig (optional) <br />
+  # cp wl.ko /lib/modules/`uname -r`/kernel/net/wireless/wl.ko <br/>
+  # depmod <br/>
+  # modprobe wl <br/>
+</div>
+#+END_HTML
+* Common Issues:
+  After *modprobe*, I trid to start up using *ifconfig eth1 up*, it comes
+  *Operation not possible due to RF-kill*, just google, some goolers' solution:
+  #+BEGIN_HTML
+  <div style="direction:ltr; margin:0 5px 10px 5px; padding:5px; border-color:#998b75; border-width:1px 1px 1px 1px; border-style:solid; font-weight:normal; color:#006600; line-height:140%; font-size:1em; font-family:courier,monospace; background-color:#FAFAFA">
+  # rfkill unblock all <br/>
+  # rfkill list <br/>
+  </div>
+  #+END_HTML
+  But something seen a little different from the sulution:
+#+BEGIN_HTML
+<pre style="border:1pt solid #AEBDCC; background-color:#F3F5F7; padding:5pt; font-family:courier,monospace; font-size:90%; overflow:auto">
+  1: brcmwl-0: Wireless LAN
+	Soft blocked: no
+	Hard blocked: yes
+</pre>
+#+END_HTML
+  OMG, why the Hard blocked always "yes", somebody tips me, switch to Windows
+  and turn it off, can I say s-h-i-t? I reboot and go into BIOS, switch the
+  "wireless LAN radio" to "on", after that, the new =wl= driver was operational.
+
+* Setup To Always Load At Boot Time
+  #+BEGIN_HTML
+  <div style="direction:ltr; margin:0 5px 10px 5px; padding:5px; border-color:#998b75; border-width:1px 1px 1px 1px; border-style:solid; font-weight:normal; color:#006600; line-height:140%; font-size:1em; font-family:courier,monospace; background-color:#FAFAFA">
+  # echo wl >> /etc/modules <br/>
+  # reboot <br/>
+  </div>
+  #+END_HTML
