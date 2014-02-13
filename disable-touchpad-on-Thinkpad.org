@@ -1,0 +1,86 @@
+#+TITLE: Disable Touchpad while using trackpoin on Thinkpad E430
+#+AUTHOR: Shusheng Shaw
+#+EMAIL: bluebird.shao@gmail.com
+
+Thinkpad E430 has both a trackpoint and a touchpad. The touchpad is disable 
+when typing. However, when I'm using the trackpoint, I often touch the
+touchpad as well, and generate mouse clicks I'd like to avoid. So, I need to
+find out a solution to disable touchpad while I'm using trackpoint or typing.
+
+xinput is a utility to list available input devices, query information
+about a device and change input device settings. Here's my solution:
+1. From *xinput* list grep touchpad device name:
+#+BEGIN_HTML
+   <div style="direction:ltr; margin:0 5px 10px 5px; padding:5px; border-color:#998b75; border-width:1px 1px 1px 1px; border-style:solid; font-weight:normal; color:#006600; line-height:140%; font-size:1em; font-family:courier,monospace; background-color:#FAFAFA">
+$ xinput --list | grep -i touchpad
+</div>
+#+END_HTML
+    from outputs, I got the device's name:
+#+BEGIN_HTML
+<pre style="border:1pt solid #AEBDCC; background-color:#F3F5F7; padding:5pt; font-family:courier,monospace; font-size:90%; overflow:auto">
+⎜   ↳ <strong>SynPS/2 Synaptics TouchPad</strong>              	id=15	[slave  pointer  (2)]
+</pre>
+#+END_HTML
+    maybe your id is not *15*, but that's not matter. What we need just 
+    '*SynPS/2 Synaptics TouchPad*'
+
+2. write
+#+BEGIN_HTML
+<pre style="border:1pt solid #AEBDCC; background-color:#F3F5F7; padding:5pt; font-family:courier,monospace; font-size:90%; overflow:auto">
+xinput set-prop 'SynPS/2 Synaptics TouchPad' 'Device Enabled' 0
+</pre>
+#+END_HTML
+   into *StartUp Applications Preferences*
+
+That's all right.
+
+But after that, I make a directory in $HOME/bin and code a shell 
+script /touchpad/:
+#+BEGIN_HTML
+<pre style="border:1pt solid #AEBDCC; background-color:#F3F5F7; padding:5pt; font-family:courier,monospace; font-size:90%; overflow:auto">
+#! /bin/sh
+
+PATH=/sbin:/bin:/usr/bin
+
+. /lib/lsb/init-functions
+
+do_start() {
+    exec xinput set-prop 'SynPS/2 Synaptics TouchPad' 'Device Enabled' 1
+}
+
+do_stop() {
+    exec xinput set-prop 'SynPS/2 Synaptics TouchPad' 'Device Enabled' 0
+}
+
+case "$1" in
+    start)
+	do_start
+	;;
+    restart|reload|force-reload)
+	echo "Error: argument '$1' not supported" >&2
+	exit 3
+	;;
+    stop)
+	do_stop
+	;;
+    *)
+	echo "Usage: $0 start|stop" >&2
+	exit 3
+	;;
+esac
+</pre>
+#+END_HTML
+and make a link to /etc/init.d/touchpad, so when i need touchpad enable, I can 
+type: 
+#+BEGIN_HTML
+<div style="direction:ltr; margin:0 5px 10px 5px; padding:5px; border-color:#998b75; border-width:1px 1px 1px 1px; border-style:solid; font-weight:normal; color:#006600; line-height:140%; font-size:1em; font-family:courier,monospace; background-color:#FAFAFA">
+$ sudo /etc/init.d/touchpad start
+</div>
+#+END_HTML
+or if I don't need it again:
+#+BEGIN_HTML
+<div style="direction:ltr; margin:0 5px 10px 5px; padding:5px; border-color:#998b75; border-width:1px 1px 1px 1px; border-style:solid; font-weight:normal; color:#006600; line-height:140%; font-size:1em; font-family:courier,monospace; background-color:#FAFAFA">
+$ sudo /etc/init.d/touchpad stop
+</div>
+#+END_HTML
+That's funny.
