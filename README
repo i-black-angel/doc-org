@@ -21,6 +21,7 @@ computers sometimes, i wanna put my writings on this place, that's all.
 OPTIONAL
    $ git config --global user.name "Your Name"
    $ git config --global user.email you@example.com
+   $ git config --global color.ui true
    $ touch README
    $ git init
    $ git add README
